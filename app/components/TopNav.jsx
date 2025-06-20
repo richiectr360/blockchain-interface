@@ -6,6 +6,12 @@ import { useSDK } from "@metamask/sdk-react";
 import { ethers } from "ethers";
 import Jazzicon from "react-jazzicon";
 
+//Redux 
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { setAccount, setBalance } from "@/lib/features/user/user";
+import { selectAccount, selectETHBalance } from "@/lib/selectors";
+
+//Hooks
 import { useProvider } from "../hooks/useProvider";
 
 import network from "../assets/other/network.svg";
@@ -17,8 +23,9 @@ function TopNav() {
     const { sdk, connected, connecting } = useSDK();
     const { provider } = useProvider();
 
-    const [account, setAccount] = useState("");
-    const [balance, setBalance] = useState("");
+    const dispatch = useAppDispatch();
+    const account = useAppSelector(selectAccount);
+    const balance = useAppSelector(selectETHBalance);
 
     async function connectHandler() {
         try {
@@ -39,9 +46,11 @@ function TopNav() {
 
             const account = await provider.getAddress();
             const balance = await provider.getBalance();
-            
-            setAccount(account);
-            setBalance(ethers.formatUnits(balance, 18));
+
+            // Store tge values in the state.
+            dispatch(setAccount(account.address));
+            dispatch(setBalance(ethers.formatUnits(balance, 18)));
+
         } catch (err) {
             console.error("Failed to get account info:", err);
         }
